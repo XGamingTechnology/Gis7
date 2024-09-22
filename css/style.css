@@ -1,0 +1,217 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+  }
+  
+  #map {
+    width: 100%;
+    height: 100vh;
+  }
+  
+  /* Sidebar Styles */
+.sidebar {
+  background-color: rgba(248, 249, 250, 0.9); /* Background with slight transparency */
+  border-right: 1px solid #ddd;
+  height: 100vh;
+  padding: 20px; /* Add padding for better spacing */
+  position: fixed;
+  top: 0;
+  left: -250px; /* Sidebar starts hidden */
+  width: 250px;
+  max-width: 40%;
+  transition: left 0.3s ease, opacity 0.3s ease;
+  opacity: 0; /* Starts invisible */
+  z-index: 1000; /* Ensure sidebar is above the map */
+}
+
+.sidebar.visible {
+  left: 0; /* Sidebar slides in */
+  opacity: 1; /* Sidebar becomes visible */
+}
+
+/* Adjust h3 in sidebar for spacing */
+.sidebar h3 {
+  font-size: 20px;
+  margin-bottom: 15px; /* Add some margin below the header */
+  font-weight: bold;
+}
+
+/* Sidebar Controls (e.g., dropdowns) */
+.sidebar .form-group {
+  margin-bottom: 20px; /* Add spacing between controls */
+}
+
+.sidebar .form-group label {
+  font-size: 16px;
+  font-weight: normal;
+}
+
+.sidebar .form-group select {
+  font-size: 14px;
+  padding: 5px;
+}
+
+/* Sidebar Button */
+.sidebar-button {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background: rgba(0, 123, 255, 0.8); /* Button with transparency */
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 10px;
+  cursor: pointer;
+  z-index: 1001; /* Ensure it's above the sidebar */
+}
+
+.sidebar-button:hover {
+  background: rgba(0, 123, 255, 1); /* Solid color on hover */
+}
+
+/* Map Container */
+.map-container {
+  transition: margin-left 0.3s ease;
+  position: relative;
+  height: 100vh;
+}
+
+.map-container.shifted {
+  margin-left: 250px; /* Adjust margin based on sidebar width */
+}
+
+#map {
+  height: 100%;
+  width: 100%;
+}
+
+/* Navbar Styling */
+.navbar {
+  position: fixed;
+  width: 100%;
+  z-index: 1001;
+  top: 0;
+  left: 0;
+  border-bottom: 1px solid #ddd;
+}
+
+/* Ensure sidebar doesn't overlap with navbar */
+.sidebar {
+  top: 56px; /* Assuming the navbar height is 56px */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .sidebar {
+      width: 200px; /* Narrower sidebar on smaller screens */
+      left: -200px;
+  }
+
+  .sidebar.visible {
+      left: 0;
+  }
+
+  .map-container.shifted {
+      margin-left: 200px;
+  }
+}
+
+@media (max-width: 576px) {
+  .sidebar {
+      width: 100%; /* Full-width sidebar on mobile */
+      left: -100%;
+  }
+
+  .sidebar.visible {
+      left: 0;
+  }
+
+  .map-container.shifted {
+      margin-left: 0; /* No map shift on mobile */
+  }
+
+  .sidebar-button {
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      font-size: 14px;
+  }
+
+  .sidebar h3 {
+      font-size: 16px;
+  }
+
+  .sidebar label, .sidebar select, .sidebar input {
+      font-size: 12px;
+  }
+
+  .category-control img {
+      width: 18px;
+      height: 18px;
+  }
+
+  .category-control label {
+      font-size: 12px;
+  }
+
+  .opacity-slider {
+      width: 100%;
+  }
+}
+
+/* Custom positioning for zoom control */
+@media (max-width: 576px) {
+  .leaflet-control-zoom {
+      left: auto !important;
+      right: 10px;
+      bottom: 10px;
+      top: auto !important;
+  }
+}
+
+/* Popup Styling */
+.leaflet-popup-content-wrapper {
+  max-width: 280px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.leaflet-popup-content {
+  font-size: 14px;
+}
+
+.leaflet-popup-content table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.leaflet-popup-content table td, 
+.leaflet-popup-content table th {
+  padding: 5px;
+  border: 1px solid #ddd;
+}
+
+.leaflet-popup-content table tr:nth-child(odd) {
+  background-color: #f9f9f9;
+}
+
+.leaflet-popup-content table tr:nth-child(even) {
+  background-color: #ffffff;
+}
+
+/* Popup Adjustments for Small Screens */
+@media (max-width: 576px) {
+  .leaflet-popup-content-wrapper {
+      max-width: 220px;
+  }
+
+  .leaflet-popup-content {
+      font-size: 12px;
+  }
+
+  .leaflet-popup-content table td, 
+  .leaflet-popup-content table th {
+      padding: 4px;
+  }
+}
+
