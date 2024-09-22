@@ -32,191 +32,88 @@ var pointsLayer = L.layerGroup().addTo(map);
 var polygonsLayer = L.layerGroup().addTo(map);
 var polygonsLayer2 = L.layerGroup().addTo(map);
 
-// // Path ke file GeoJSON lokal
+// Path ke file GeoJSON lokal
 var titikGeoJSON = 'asset/data/Point Genangan.geojson';
 var kabupatenGeoJSON = 'asset/data/Data Perkelurahan.geojson';
 var kabupatenGeoJSON2 = 'asset/data/DKI.geojson';
 
-// Fungsi untuk menambahkan marker
-// Definisikan basePath di luar fungsi
-var basePath = "file:///D:/MY%20Data/kerjaan/2024/pelatihan/MODUL/PELATIHAN%20WEBGIS/Bahan/WEBSITE/Gis/images/"; // Ganti dengan path yang sesuai
-
-// Definisikan basePath dengan format yang sesuai
+// Definisikan basePath
 var basePath = "file:///D:/MY%20Data/kerjaan/2024/pelatihan/MODUL/PELATIHAN%20WEBGIS/Bahan/WEBSITE/Gis/images/";
 
+// Fungsi untuk menambahkan marker
 function addMarkers() {
-  fetch(titikGeoJSON)
-    .then(response => response.json())
-    .then(data => {
-      console.log('GeoJSON Point Data:', data);  // Debug untuk memeriksa struktur data
+    fetch(titikGeoJSON)
+        .then(response => response.json())
+        .then(data => {
+            var geojsonLayer = L.geoJSON(data, {
+                pointToLayer: function (feature, latlng) {
+                    var fotoId = feature.properties['Foto'];
+                    var fotoPath = fotoId !== null ? basePath + fotoId + '.jpeg' : null;
 
-      var geojsonLayer = L.geoJSON(data, {
-        pointToLayer: function (feature, latlng) {
-          console.log('Feature properties:', feature.properties);  // Debug untuk memeriksa properti fitur
+                    // Buat konten popup
+                    var popupContent = '<table>';
+                    var properties = feature.properties;
 
-          // Ambil ID foto dan buat path lengkap
-          var fotoId = feature.properties['Foto'];
-          var fotoPath = fotoId !== null ? basePath + fotoId + '.jpeg' : null;
+                    if (properties) {
+                        popupContent += `
+                            <tr><th scope="row">Name</th><td>${properties['name'] || 'Data tidak tersedia'}</td></tr>
+                            <tr><th scope="row">Ruas Jalan</th><td>${properties['Ruas Jalan'] || 'Data tidak tersedia'}</td></tr>
+                            <tr><th scope="row">RT</th><td>${properties['Ruas Jal_1'] !== '-' ? properties['Ruas Jal_1'] : 'Tidak ada'}</td></tr>
+                            <tr><th scope="row">Kabupaten</th><td>${properties['Ruas Jal_2'] !== '-' ? properties['Ruas Jal_2'] : 'Tidak ada'}</td></tr>
+                            <tr><th scope="row">Tinggi Genangan</th><td>${properties['Ruas Jal_3'] !== '-' ? properties['Ruas Jal_3'] : 'Tidak ada'}</td></tr>
+                            <tr><th scope="row">Foto</th><td>${fotoPath ? '<img src="' + fotoPath + '" style="width:100px; height:auto;">' : 'Foto tidak tersedia'}</td></tr>
+                            <tr><th scope="row">Kategori</th><td>${properties['Kategori'] || 'Data tidak tersedia'}</td></tr>
+                        `;
+                    }
+                    popupContent += '</table>';
 
-          // Buat konten popup
-          var popupContent = '<table>\
-                              <tr>\
-                                  <th scope="row">Name</th>\
-                                  <td>' + (feature.properties['name'] !== null ? feature.properties['name'] : 'Data tidak tersedia') + '</td>\
-                              </tr>\
-                              <tr>\
-                                  <th scope="row">Ruas Jalan</th>\
-                                  <td>' + (feature.properties['Ruas Jalan'] !== null ? feature.properties['Ruas Jalan'] : 'Data tidak tersedia') + '</td>\
-                              </tr>\
-                              <tr>\
-                                  <th scope="row">RT</th>\
-                                  <td>' + (feature.properties['Ruas Jal_1'] !== null && feature.properties['Ruas Jal_1'] !== '-' ? feature.properties['Ruas Jal_1'] : 'Tidak ada') + '</td>\
-                              </tr>\
-                              <tr>\
-                                  <th scope="row">Kabupaten</th>\
-                                  <td>' + (feature.properties['Ruas Jal_2'] !== null && feature.properties['Ruas Jal_2'] !== '-' ? feature.properties['Ruas Jal_2'] : 'Tidak ada') + '</td>\
-                              </tr>\
-                              <tr>\
-                                  <th scope="row">Tinggi Genangan</th>\
-                                  <td>' + (feature.properties['Ruas Jal_3'] !== null && feature.properties['Ruas Jal_3'] !== '-' ? feature.properties['Ruas Jal_3'] : 'Tidak ada') + '</td>\
-                              </tr>\
-                              <tr>\
-                                  <th scope="row">Foto</th>\
-                                  <td>' + (fotoPath !== null ? '<img src="' + fotoPath + '" style="width:100px; height:auto;">' : 'Foto tidak tersedia') + '</td>\
-                              </tr>\
-                              <tr>\
-                                  <th scope="row">Kategori</th>\
-                                  <td>' + (feature.properties['Kategori'] !== null ? feature.properties['Kategori'] : 'Data tidak tersedia') + '</td>\
-                              </tr>\
-                          </table>';
+                    // Tambahkan marker dengan popup
+                    var marker = L.marker(latlng);
+                    marker.bindPopup(popupContent);
+                    return marker;
+                }
+            });
 
-          // Tambahkan marker dengan popup
-          var marker = L.marker(latlng);
-          marker.bindPopup(popupContent);
-          return marker;
-        }
-      });
-
-      // Tambahkan layer geojson ke pointsLayer
-      pointsLayer.addLayer(geojsonLayer);
-    })
-    .catch(error => console.error('Error fetching point GeoJSON:', error));
+            // Tambahkan layer geojson ke pointsLayer
+            pointsLayer.addLayer(geojsonLayer);
+        })
+        .catch(error => console.error('Error fetching point GeoJSON:', error));
 }
-
-
-
-
-function addKabupatenPolygons() {
-  fetch(kabupatenGeoJSON)
-      .then(response => {
-          if (!response.ok) {
-              throw new Error('Network response was not ok');
-          }
-          return response.json();
-      })
-      .then(data => {
-          // Debug: Log GeoJSON data yang diterima
-          console.log("GeoJSON Data:", data);
-          
-          // Pastikan GeoJSON memiliki properti 'features'
-          if (!data.features || data.features.length === 0) {
-              console.error("No features found in GeoJSON data");
-              return;
-          }
-
-          var geojsonLayer = L.geoJSON(data, {
-              style: function (feature) {
-                  return { color: 'blue', weight: 2 };
-              },
-              onEachFeature: function (feature, layer) {
-                  // Debug: Lihat properti dari tiap fitur
-                  console.log("Feature properties:", feature.properties);
-
-                  // Membuat popup content dari properti yang ada
-                  var props = feature.properties;
-                  var popupContent = '<table>\
-                      <tr>\
-                          <th scope="row">KELURAHAN</th>\
-                          <td>' + (props.NAMOBJ !== null ? props.NAMOBJ : 'Data tidak tersedia') + '</td>\
-                      </tr>\
-                      <tr>\
-                          <th scope="row">Luas</th>\
-                          <td>' + (props.area !== null ? props.area + ' km²' : 'Data tidak tersedia') + '</td>\
-                      </tr>\
-                      <tr>\
-                          <th scope="row">Populasi</th>\
-                          <td>' + (props.population !== null ? props.population : 'Data tidak tersedia') + '</td>\
-                      </tr>\
-                      <tr>\
-                          <th scope="row">Ibu Kota</th>\
-                          <td>' + (props.capital !== null ? props.capital : 'Data tidak tersedia') + '</td>\
-                      </tr>\
-                      <tr>\
-                          <th scope="row">Jumlah RT</th>\
-                          <td>' + (props["Jumlah RT"] !== null ? props["Jumlah RT"] : 'Data tidak tersedia') + '</td>\
-                      </tr>\
-                      <tr>\
-                          <th scope="row">Ketinggian</th>\
-                          <td>' + (props.Ketinggian !== null ? props.Ketinggian : 'Data tidak tersedia') + '</td>\
-                      </tr>\
-                      <tr>\
-                          <th scope="row">Penyebab</th>\
-                          <td>' + (props.Penyebab !== null ? props.Penyebab : 'Data tidak tersedia') + '</td>\
-                      </tr>\
-                      <tr>\
-                          <th scope="row">Kategori</th>\
-                          <td>' + (props.Kategori !== null ? props.Kategori : 'Data tidak tersedia') + '</td>\
-                      </tr>\
-                      <tr>\
-                          <th scope="row">Lokasi</th>\
-                          <td>' + (props.Lokasi !== null ? props.Lokasi : 'Data tidak tersedia') + '</td>\
-                      </tr>\
-                  </table>';
-
-
-                  // Mengikat popup ke layer
-                  layer.bindPopup(popupContent);
-              }
-          });
-
-          // Tambahkan layer poligon ke map
-          polygonsLayer.addLayer(geojsonLayer);
-      })
-      .catch(error => console.error('Error fetching polygon GeoJSON:', error));
-}
-
 
 // Fungsi untuk menambahkan polygon Data Perkelurahan
-function addDataPerkelurahanPolygons() {
+function addKabupatenPolygons() {
     fetch(kabupatenGeoJSON)
         .then(response => response.json())
-        .then(json_DataPerkelurahan_1 => {
-            var layer_DataPerkelurahan_1 = L.geoJson(json_DataPerkelurahan_1, {
-                attribution: '',
-                interactive: true,
-                onEachFeature: pop_DataPerkelurahan_1,
-                style: style_DataPerkelurahan_1
+        .then(data => {
+            var geojsonLayer = L.geoJSON(data, {
+                style: function (feature) {
+                    return { color: 'blue', weight: 2 };
+                },
+                onEachFeature: function (feature, layer) {
+                    var props = feature.properties;
+                    var popupContent = '<table>';
+                    if (props) {
+                        popupContent += `
+                            <tr><th scope="row">KELURAHAN</th><td>${props.NAMOBJ || 'Data tidak tersedia'}</td></tr>
+                            <tr><th scope="row">Luas</th><td>${props.area ? props.area + ' km²' : 'Data tidak tersedia'}</td></tr>
+                            <tr><th scope="row">Populasi</th><td>${props.population || 'Data tidak tersedia'}</td></tr>
+                            <tr><th scope="row">Ibu Kota</th><td>${props.capital || 'Data tidak tersedia'}</td></tr>
+                            <tr><th scope="row">Jumlah RT</th><td>${props["Jumlah RT"] || 'Data tidak tersedia'}</td></tr>
+                            <tr><th scope="row">Ketinggian</th><td>${props.Ketinggian || 'Data tidak tersedia'}</td></tr>
+                            <tr><th scope="row">Penyebab</th><td>${props.Penyebab || 'Data tidak tersedia'}</td></tr>
+                            <tr><th scope="row">Kategori</th><td>${props.Kategori || 'Data tidak tersedia'}</td></tr>
+                            <tr><th scope="row">Lokasi</th><td>${props.Lokasi || 'Data tidak tersedia'}</td></tr>
+                        `;
+                    }
+                    popupContent += '</table>';
+                    layer.bindPopup(popupContent);
+                }
             });
-            polygonsLayer.addLayer(layer_DataPerkelurahan_1);
+
+            // Tambahkan layer poligon ke map
+            polygonsLayer.addLayer(geojsonLayer);
         })
-        .catch(error => console.error('Error fetching polygon Data Perkelurahan GeoJSON:', error));
-}
-
-// Fungsi untuk popups Data Perkelurahan
-function pop_DataPerkelurahan_1(feature, layer) {
-    if (feature.properties && feature.properties.name) {
-        layer.bindPopup("<b>Perkelurahan: </b>" + feature.properties.name);
-    }
-}
-
-// Function to define styles for Data Perkelurahan polygons
-function style_DataPerkelurahan_1(feature) {
-    return {
-        color: 'blue', 
-        weight: 2,     
-        fillColor: 'green', 
-        fillOpacity: 0.5 
-    };
+        .catch(error => console.error('Error fetching polygon GeoJSON:', error));
 }
 
 // Fungsi untuk menambahkan polygon (kabupaten) kedua
@@ -246,7 +143,6 @@ function addKabupaten2Polygons() {
 // Panggil fungsi untuk menambahkan semua data
 addMarkers();
 addKabupatenPolygons();
-addDataPerkelurahanPolygons();
 addKabupaten2Polygons();
 
 // Event listener untuk checkbox
@@ -291,11 +187,15 @@ function checkScreenWidth() {
     }
 }
 
-checkScreenWidth();
+// Call the function on window resize
 window.addEventListener('resize', checkScreenWidth);
+checkScreenWidth(); // Initial check
 
+// Toggle sidebar
 sidebarToggle.addEventListener('click', function () {
     sidebar.classList.toggle('visible');
     mapContainer.classList.toggle('shifted');
-    sidebarToggle.innerHTML = sidebar.classList.contains('visible') ? `<i class="fas fa-chevron-left"></i>` : `<i class="fas fa-chevron-right"></i>`;
+    sidebarToggle.innerHTML = sidebar.classList.contains('visible') ?
+        `<i class="fas fa-chevron-left"></i>` :
+        `<i class="fas fa-chevron-right"></i>`;
 });
